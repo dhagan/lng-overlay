@@ -311,6 +311,25 @@
       padding: 1rem;
       text-align: center;
       border: 2px solid #334155;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .comparison-img::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+    .comparison-img > div {
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
     }
     .before-img {
       border-color: #22c55e;
@@ -410,7 +429,7 @@
       <div class="comparison-grid">
         <div class="comparison-item">
           <h3>✅ Current View from Shore</h3>
-          <div class="comparison-img before-img">
+          <div class="comparison-img before-img" style="background-image: url('images/beach-pristine.jpg');">
             <div>
               <strong>Pristine Ocean Horizon</strong><br/><br/>
               Clear views of sunset<br/>
@@ -422,7 +441,7 @@
         </div>
         <div class="comparison-item">
           <h3>⛔ After LNG Infrastructure</h3>
-          <div class="comparison-img after-img">
+          <div class="comparison-img after-img" style="background-image: url('images/lng-industrial.jpg');">
             <div>
               <strong>Industrial Skyline</strong><br/><br/>
               Massive FSRU visible 24/7<br/>
@@ -448,7 +467,7 @@
       <div class="comparison-grid" style="margin-top: 2rem;">
         <div class="comparison-item">
           <h3>✅ Beach Experience Today</h3>
-          <div class="comparison-img before-img">
+          <div class="comparison-img before-img" style="background-image: url('images/beach-paradise.jpg');">
             <div>
               <strong>Natural Paradise</strong><br/><br/>
               Sound of waves<br/>
@@ -460,7 +479,7 @@
         </div>
         <div class="comparison-item">
           <h3>⛔ Beach Experience After</h3>
-          <div class="comparison-img after-img">
+          <div class="comparison-img after-img" style="background-image: url('images/industrial-coast.jpg');">
             <div>
               <strong>Industrial Zone</strong><br/><br/>
               Machinery noise 24/7<br/>
