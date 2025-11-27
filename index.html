@@ -204,8 +204,8 @@
       margin-bottom: 0.3rem;
     }
     @keyframes pulse-danger {
-      0%, 100% { opacity: 0.15; transform: scale(1); }
-      50% { opacity: 0.3; transform: scale(1.05); }
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.08); }
     }
     .pulse-circle {
       animation: pulse-danger 3s ease-in-out infinite;
@@ -560,39 +560,39 @@
         // Visual impact zone (what you can see) - with pulsing animation
         const visualZone = L.circle(latlng, {
           radius: 5000, // 5km visual impact
-          color: '#ef4444',
-          fillColor: '#dc2626',
-          fillOpacity: 0.1,
-          weight: 1,
-          dashArray: '5, 5',
-          opacity: 0.6,
+          color: '#b91c1c',
+          fillColor: '#7f1d1d',
+          fillOpacity: 0.35,
+          weight: 2,
+          dashArray: '8, 4',
+          opacity: 0.9,
           className: 'pulse-circle'
-        }).bindPopup('<strong>Visual Impact Zone</strong><br/>5km radius - industrial infrastructure visible from shore<br/><em>Beaches, parks, and coastal communities affected</em>').addTo(map);
+        }).bindPopup('<strong>⚠️ Visual Impact Zone</strong><br/>5km radius - industrial infrastructure visible from shore<br/><em>Beaches, parks, and coastal communities affected</em>').addTo(map);
 
         // Environmental impact zone
         L.circle(latlng, {
           radius: 2000, // 2km environmental impact
-          color: '#f59e0b',
-          fillColor: '#f59e0b',
-          fillOpacity: 0.15,
-          weight: 1,
-          dashArray: '3, 3',
-          opacity: 0.5,
+          color: '#d97706',
+          fillColor: '#92400e',
+          fillOpacity: 0.4,
+          weight: 2,
+          dashArray: '5, 3',
+          opacity: 0.85,
           className: 'pulse-circle'
-        }).bindPopup('<strong>Marine Impact Zone</strong><br/>2km radius - water quality, noise, marine life disruption<br/><em>Coral reefs, fish spawning grounds, turtle habitat</em>').addTo(map);
+        }).bindPopup('<strong>🔥 Marine Impact Zone</strong><br/>2km radius - water quality, noise, marine life disruption<br/><em>Coral reefs, fish spawning grounds, turtle habitat</em>').addTo(map);
         
         // Explosion hazard zone (if FSRU)
         if (type === 'FSRU') {
           L.circle(latlng, {
             radius: 1000,
-            color: '#dc2626',
-            fillColor: '#7f1d1d',
-            fillOpacity: 0.2,
-            weight: 2,
-            dashArray: '2, 4',
-            opacity: 0.7,
+            color: '#991b1b',
+            fillColor: '#450a0a',
+            fillOpacity: 0.6,
+            weight: 3,
+            dashArray: '4, 2',
+            opacity: 1,
             className: 'pulse-circle'
-          }).bindPopup('<strong>⚠️ Explosion/Fire Hazard Zone</strong><br/>1km radius catastrophic risk zone<br/><em>LNG is highly flammable - stored at -260°F</em>').addTo(map);
+          }).bindPopup('<strong>💀 EXPLOSION/FIRE HAZARD ZONE</strong><br/>1km radius catastrophic risk zone<br/><em>LNG is highly flammable - stored at -260°F</em>').addTo(map);
         }
       }
 
@@ -607,10 +607,10 @@
       if (type === 'onshore-facility') color = '#22c55e';
       if (type === 'pipeline') {
         return {
-          color: '#dc2626',
-          weight: 6,
-          opacity: 0.8,
-          dashArray: '10, 5'
+          color: '#991b1b',
+          weight: 8,
+          opacity: 0.95,
+          dashArray: '12, 6'
         };
       }
 
