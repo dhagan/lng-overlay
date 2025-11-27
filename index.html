@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Hawaiʻi Proposed LNG Infrastructure Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    .map-container {
+      position: relative;
+      height: 100vh;
+      width: 100vw;
+    }
+    .map-header {
+      position: absolute;
+      top: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.75rem 1.25rem;
+      border-radius: 999px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .map-header-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+    .map-header-badge {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #bbf7d0;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+    .legend {
+      position: absolute;
+      bottom: 1rem;
+      left: 1rem;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.8rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+    }
+    .legend h3 {
+      margin: 0 0 0.35rem;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #9ca3af;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.2rem;
+    }
+    .legend-swatch {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+    .legend-swatch.fsru {
+      background: #f97316;
+    }
+    .legend-swatch.pipeline {
+      background: #38bdf8;
+    }
+    .legend-swatch.onshore {
+      background: #22c55e;
+    }
+    .impact-warning {
+      position: absolute;
+      top: 4rem;
+      right: 1rem;
+      background: rgba(220, 38, 38, 0.95);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(220, 38, 38, 0.4);
+      z-index: 1000;
+      max-width: 280px;
+      border: 2px solid rgba(254, 202, 202, 0.5);
+    }
+    .impact-warning h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #fef2f2;
+    }
+    .impact-warning ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: #fecaca;
+    }
+    .impact-warning li {
+      margin-bottom: 0.3rem;
+    }
+    .stats-panel {
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 300px;
+      border-top: 3px solid #f59e0b;
+    }
+    .stats-panel h3 {
+      margin: 0 0 0.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #f59e0b;
+    }
+    .stat-item {
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .stat-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .stat-label {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.2rem;
+    }
+    .stat-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #ef4444;
+    }
+    .stat-subtext {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+      margin-top: 0.2rem;
+    }
+    .alternatives-panel {
+      position: absolute;
+      top: 4rem;
+      left: 1rem;
+      background: rgba(6, 78, 59, 0.95);
+      padding: 1rem;
+      border-radius: 0.75rem;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 1000;
+      max-width: 280px;
+      border: 2px solid rgba(74, 222, 128, 0.3);
+    }
+    .alternatives-panel h3 {
+      margin: 0 0 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #86efac;
+    }
+    .alternatives-panel ul {
+      margin: 0;
+      padding-left: 1.2rem;
+      color: #d1fae5;
+    }
+    .alternatives-panel li {
+      margin-bottom: 0.3rem;
+    }
+    @keyframes pulse-danger {
+      0%, 100% { opacity: 0.15; transform: scale(1); }
+      50% { opacity: 0.3; transform: scale(1.05); }
+    }
+    .pulse-circle {
+      animation: pulse-danger 3s ease-in-out infinite;
+    }
+    .timeline-marker {
+      background: rgba(239, 68, 68, 0.9);
+      padding: 0.3rem 0.6rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: white;
+      white-space: nowrap;
+    }
+    .toggle-mockup {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      z-index: 1001;
+      border: 2px solid #3b82f6;
+      color: #93c5fd;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .toggle-mockup:hover {
+      background: rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+    }
+    .mockup-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 2000;
+      display: none;
+      padding: 2rem;
+      overflow-y: auto;
+    }
+    .mockup-overlay.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .mockup-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #dc2626;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .mockup-content {
+      max-width: 900px;
+      background: rgba(15, 23, 42, 0.95);
+      padding: 2rem;
+      border-radius: 1rem;
+      margin-top: 3rem;
+    }
+    .mockup-content h2 {
+      color: #ef4444;
+      margin-top: 0;
+      font-size: 1.5rem;
+      text-align: center;
+    }
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .comparison-item {
+      text-align: center;
+    }
+    .comparison-item h3 {
+      margin: 0.5rem 0;
+      color: #94a3b8;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+    }
+    .comparison-img {
+      width: 100%;
+      height: 250px;
+      background: #1e293b;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 0.85rem;
+      padding: 1rem;
+      text-align: center;
+      border: 2px solid #334155;
+    }
+    .before-img {
+      border-color: #22c55e;
+    }
+    .after-img {
+      border-color: #ef4444;
+    }
+    .impact-description {
+      background: rgba(220, 38, 38, 0.1);
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      border-left: 4px solid #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="map-container">
+    <button class="toggle-mockup" onclick="document.getElementById('mockupOverlay').classList.add('active')">
+      📸 Show Visual Impact Mockups
+    </button>
+    <div class="map-header">
+      <span class="map-header-title">Proposed LNG Infrastructure – Hawaiʻi</span>
+      <span class="map-header-badge">Draft – for advocacy use</span>
+    </div>
+    <div class="impact-warning">
+      <h3>⚠️ Environmental Concerns</h3>
+      <ul>
+        <li>Industrialization of pristine coastline</li>
+        <li>Marine ecosystem disruption</li>
+        <li>Fossil fuel lock-in for decades</li>
+        <li>Visual pollution of ocean views</li>
+        <li>Explosion & spill risks</li>
+      </ul>
+    </div>
+    <div class="alternatives-panel">
+      <h3>💚 Better Alternatives</h3>
+      <ul>
+        <li>Solar + Battery Storage: $2B</li>
+        <li>Offshore Wind: $3B</li>
+        <li>Geothermal Expansion: $1B</li>
+        <li>Energy Efficiency: $500M</li>
+        <li><strong>vs. LNG: $4-6B + decades of fuel costs</strong></li>
+      </ul>
+    </div>
+    <div id="map"></div>
+    <div class="legend">
+      <h3>Layers</h3>
+      <div class="legend-item">
+        <span class="legend-swatch fsru"></span>
+        <span>FSRU / Offshore Terminal</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch pipeline"></span>
+        <span>Subsea / Onshore Pipeline</span>
+      </div>
+      <div class="legend-item">
+        <span class="legend-swatch onshore"></span>
+        <span>Onshore Gas / Power Facilities</span>
+      </div>
+    </div>
+    <div class="stats-panel">
+      <h3>📊 Project Pitfalls</h3>
+      <div class="stat-item">
+        <div class="stat-label">Estimated Cost</div>
+        <div class="stat-value">$4-6 Billion</div>
+        <div class="stat-subtext">+ ongoing fuel imports</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Lock-In Period</div>
+        <div class="stat-value">30-40 Years</div>
+        <div class="stat-subtext">blocks renewable transition</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">LNG Tankers/Year</div>
+        <div class="stat-value">50-100</div>
+        <div class="stat-subtext">increased shipping traffic</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">CO₂ Emissions</div>
+        <div class="stat-value">+2M tons/yr</div>
+        <div class="stat-subtext">undermines climate goals</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Jobs vs. Solar</div>
+        <div class="stat-value">-60%</div>
+        <div class="stat-subtext">renewables create more jobs</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="mockupOverlay" class="mockup-overlay">
+    <button class="mockup-close" onclick="document.getElementById('mockupOverlay').classList.remove('active')">✕ Close</button>
+    <div class="mockup-content">
+      <h2>🔥 Visual Impact: What It Will Actually Look Like</h2>
+      
+      <div class="comparison-grid">
+        <div class="comparison-item">
+          <h3>✅ Current View from Shore</h3>
+          <div class="comparison-img before-img">
+            <div>
+              <strong>Pristine Ocean Horizon</strong><br/><br/>
+              Clear views of sunset<br/>
+              Natural coastline<br/>
+              Unobstructed ocean<br/>
+              Dark skies at night
+            </div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <h3>⛔ After LNG Infrastructure</h3>
+          <div class="comparison-img after-img">
+            <div>
+              <strong>Industrial Skyline</strong><br/><br/>
+              Massive FSRU visible 24/7<br/>
+              Flare stacks burning gas<br/>
+              Bright security lighting<br/>
+              LNG tankers blocking horizon
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="impact-description">
+        <h3 style="margin-top: 0; color: #fecaca;">🏭 Scale Reference</h3>
+        <ul style="color: #fecaca; margin: 0.5rem 0;">
+          <li><strong>FSRU Size:</strong> 900+ feet long (3 football fields), 150+ feet tall (15-story building)</li>
+          <li><strong>Visible Distance:</strong> 5+ miles from shore on clear days</li>
+          <li><strong>Lighting:</strong> Bright security lights visible at night like a small city</li>
+          <li><strong>Flare Stack:</strong> Emergency gas burning creates visible flame/smoke</li>
+          <li><strong>Tanker Traffic:</strong> Massive ships 1,000 feet long arriving weekly</li>
+        </ul>
+      </div>
+
+      <div class="comparison-grid" style="margin-top: 2rem;">
+        <div class="comparison-item">
+          <h3>✅ Beach Experience Today</h3>
+          <div class="comparison-img before-img">
+            <div>
+              <strong>Natural Paradise</strong><br/><br/>
+              Sound of waves<br/>
+              Clean air<br/>
+              Recreation & swimming<br/>
+              Marine wildlife viewing
+            </div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <h3>⛔ Beach Experience After</h3>
+          <div class="comparison-img after-img">
+            <div>
+              <strong>Industrial Zone</strong><br/><br/>
+              Machinery noise 24/7<br/>
+              Gas odors & emissions<br/>
+              Restricted marine areas<br/>
+              Lost tourism appeal
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="impact-description">
+        <h3 style="margin-top: 0; color: #fecaca;">💸 Economic Impact on Tourism</h3>
+        <ul style="color: #fecaca; margin: 0.5rem 0;">
+          <li>Hawaii's tourism generates <strong>$17 billion annually</strong></li>
+          <li>Pristine beaches & ocean views are the #1 draw</li>
+          <li>Industrial infrastructure destroys "paradise" image</li>
+          <li>Property values near industrial zones drop 10-30%</li>
+          <li>Lost tourism revenue could exceed LNG savings</li>
+        </ul>
+      </div>
+
+      <div class="impact-description" style="background: rgba(34, 197, 94, 0.1); border-left-color: #22c55e; margin-top: 1.5rem;">
+        <h3 style="margin-top: 0; color: #86efac;">✨ Better Alternative: Keep Paradise, Go Renewable</h3>
+        <ul style="color: #d1fae5; margin: 0.5rem 0;">
+          <li><strong>Solar farms</strong> blend with landscape, no ocean impact</li>
+          <li><strong>Battery storage</strong> is invisible infrastructure</li>
+          <li><strong>Offshore wind</strong> 12+ miles out, barely visible</li>
+          <li><strong>Distributed rooftop solar</strong> uses existing buildings</li>
+          <li><strong>Result:</strong> 100% clean energy + preserved tourism + protected ocean</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS -->
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <script>
+    // 1. Initialize the map centered on Oʻahu
+    const map = L.map('map', {
+      zoomControl: true
+    }).setView([21.3, -157.9], 9);
+
+    // 2. Base layer (OpenStreetMap)
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // 3. Style functions for different feature types
+    function pointToLayer(feature, latlng) {
+      const type = feature.properties.type;
+      let color = '#f97316'; // default FSRU
+      let radius = 8;
+      
+      if (type === 'onshore-facility') {
+        color = '#22c55e';
+        radius = 10;
+      }
+
+      // Create the main marker
+      const marker = L.circleMarker(latlng, {
+        radius: radius,
+        fillColor: color,
+        color: '#fff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.85
+      });
+
+      // Add impact zone circles for FSRU and onshore facilities
+      if (type === 'FSRU' || type === 'onshore-facility') {
+        // Visual impact zone (what you can see) - with pulsing animation
+        const visualZone = L.circle(latlng, {
+          radius: 5000, // 5km visual impact
+          color: '#ef4444',
+          fillColor: '#dc2626',
+          fillOpacity: 0.1,
+          weight: 1,
+          dashArray: '5, 5',
+          opacity: 0.6,
+          className: 'pulse-circle'
+        }).bindPopup('<strong>Visual Impact Zone</strong><br/>5km radius - industrial infrastructure visible from shore<br/><em>Beaches, parks, and coastal communities affected</em>').addTo(map);
+
+        // Environmental impact zone
+        L.circle(latlng, {
+          radius: 2000, // 2km environmental impact
+          color: '#f59e0b',
+          fillColor: '#f59e0b',
+          fillOpacity: 0.15,
+          weight: 1,
+          dashArray: '3, 3',
+          opacity: 0.5,
+          className: 'pulse-circle'
+        }).bindPopup('<strong>Marine Impact Zone</strong><br/>2km radius - water quality, noise, marine life disruption<br/><em>Coral reefs, fish spawning grounds, turtle habitat</em>').addTo(map);
+        
+        // Explosion hazard zone (if FSRU)
+        if (type === 'FSRU') {
+          L.circle(latlng, {
+            radius: 1000,
+            color: '#dc2626',
+            fillColor: '#7f1d1d',
+            fillOpacity: 0.2,
+            weight: 2,
+            dashArray: '2, 4',
+            opacity: 0.7,
+            className: 'pulse-circle'
+          }).bindPopup('<strong>⚠️ Explosion/Fire Hazard Zone</strong><br/>1km radius catastrophic risk zone<br/><em>LNG is highly flammable - stored at -260°F</em>').addTo(map);
+        }
+      }
+
+      return marker;
+    }
+
+    function styleFeature(feature) {
+      const type = feature.properties.type;
+      let color = '#38bdf8'; // default pipeline
+
+      if (type === 'FSRU') color = '#f97316';
+      if (type === 'onshore-facility') color = '#22c55e';
+      if (type === 'pipeline') {
+        return {
+          color: '#dc2626',
+          weight: 6,
+          opacity: 0.8,
+          dashArray: '10, 5'
+        };
+      }
+
+      return {
+        color: color,
+        weight: type === 'pipeline' ? 4 : 2,
+        opacity: 0.9
+      };
+    }
+
+    function onEachFeature(feature, layer) {
+      const props = feature.properties || {};
+      const name = props.name || 'Unnamed feature';
+      const type = props.type || 'unknown';
+      const status = props.status || 'unknown';
+      const description = props.description || '';
+
+      // Add environmental impact warnings
+      let warnings = '';
+      if (type === 'FSRU') {
+        warnings = `<div style="background: rgba(220, 38, 38, 0.1); padding: 0.5rem; margin-top: 0.5rem; border-left: 3px solid #dc2626;">
+          <strong style="color: #dc2626;">⚠️ Risks:</strong><br/>
+          • 50-100 LNG tanker arrivals/year<br/>
+          • Explosion/fire hazard (1km radius)<br/>
+          • 24/7 industrial lighting visible for miles<br/>
+          • Constant noise pollution<br/>
+          • Marine life disruption & thermal pollution<br/>
+          • Hurricane vulnerability<br/>
+          <br/><strong>Cost:</strong> $2-3B for FSRU alone
+        </div>`;
+      } else if (type === 'pipeline') {
+        warnings = `<div style="background: rgba(220, 38, 38, 0.1); padding: 0.5rem; margin-top: 0.5rem; border-left: 3px solid #dc2626;">
+          <strong style="color: #dc2626;">⚠️ Risks:</strong><br/>
+          • Seafloor excavation destroys habitat<br/>
+          • Irreversible coral/reef damage<br/>
+          • Leak/rupture potential (hard to detect underwater)<br/>
+          • Ongoing maintenance dredging<br/>
+          • Anchoring restrictions for boats<br/>
+          • Fishing area closures<br/>
+          <br/><strong>Cost:</strong> $500M-1B for subsea pipeline
+        </div>`;
+      } else if (type === 'onshore-facility') {
+        warnings = `<div style="background: rgba(220, 38, 38, 0.1); padding: 0.5rem; margin-top: 0.5rem; border-left: 3px solid #dc2626;">
+          <strong style="color: #dc2626;">⚠️ Risks:</strong><br/>
+          • Industrial sprawl in coastal zone<br/>
+          • Air quality: NOx, PM2.5, VOCs<br/>
+          • Noise & light pollution 24/7<br/>
+          • Property value impacts<br/>
+          • Traffic congestion (construction + operations)<br/>
+          • Locks Hawaii into fossil fuels for 30-40 years<br/>
+          • Blocks investment in renewables<br/>
+          <br/><strong>Cost:</strong> $1-2B + ongoing fuel purchases<br/>
+          <strong>Alternative:</strong> Same $ could fund 100% renewable grid
+        </div>`;
+      }
+
+      const content = `
+        <strong style="font-size: 1.1em;">${name}</strong><br/>
+        <em>Type:</em> ${type}<br/>
+        <em>Status:</em> <span style="color: #f59e0b; font-weight: 600;">${status}</span><br/>
+        ${description ? `<p style="margin-top:4px;">${description}</p>` : ''}
+        ${warnings}
+      `;
+      layer.bindPopup(content, { maxWidth: 300 });
+    }
+
+    // 4. Load LNG GeoJSON (from local file)
+    fetch('lng_infrastructure.json')
+      .then(response => {
+        if (!response.ok) throw new Error('Failed to load GeoJSON');
+        return response.json();
+      })
+      .then(data => {
+        const lngLayer = L.geoJSON(data, {
+          pointToLayer,
+          style: styleFeature,
+          onEachFeature
+        }).addTo(map);
+
+        // Fit map to data bounds if features exist
+        try {
+          const bounds = lngLayer.getBounds();
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [40, 40] });
+          }
+        } catch (e) {
+          console.warn('No valid bounds for LNG layer yet:', e);
+        }
+
+        // Optional: add layer control in case you add more overlays later
+        L.control.layers(
+          { 'OpenStreetMap': osm },
+          { 'Proposed LNG Infrastructure': lngLayer },
+          { collapsed: false }
+        ).addTo(map);
+
+        // Add timeline markers showing the lock-in period
+        const fsruCoords = [-158.09, 21.27];
+        L.marker(fsruCoords, {
+          icon: L.divIcon({
+            className: 'timeline-marker',
+            html: '2026-2066: 40 YEAR LOCK-IN',
+            iconSize: [180, 24]
+          })
+        }).addTo(map);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Could not load LNG infrastructure data. Check the console for details.');
+      });
+  </script>
+</body>
+</html>
