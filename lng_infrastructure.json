@@ -1,0 +1,47 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "FSRU",
+        "name": "Proposed Offshore FSRU",
+        "status": "proposed",
+        "description": "Floating Storage and Regasification Unit (FSRU) off Barbers Point"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-158.09, 21.27]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "pipeline",
+        "name": "Subsea LNG Pipeline",
+        "status": "proposed",
+        "description": "Approximate subsea pipeline corridor from FSRU to onshore facilities"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-158.09, 21.27],
+          [-158.07, 21.30]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "type": "onshore-facility",
+        "name": "Onshore Gas Facilities / Power Plant",
+        "status": "repowering candidate",
+        "description": "Onshore gas handling and converted power plant footprint"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-158.07, 21.30]
+      }
+    }
+  ]
+}
